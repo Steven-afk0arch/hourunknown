@@ -99,7 +99,7 @@
 }
     #exclamation {
       position: absolute;
-      top: 19%;
+      top: 18.5%;
       left: 50%;
       transform: translateX(-50%);
       font-weight: bold;
@@ -408,11 +408,11 @@ door.style.height = "294px";
     let audioStarted = false;
     window.addEventListener("click", () => {
       if (!audioStarted) {
-        soundFlicker.volume = 0.2;
-        soundNeon.volume = 0.2;
+        soundFlicker.volume = 0.1;
+        soundNeon.volume = 0.1;
         soundFlicker.play().catch(() => {});
         soundNeon.play().catch(() => {});
-        soundBackmusic.volume = 0.15;
+        soundBackmusic.volume = 0.2;
         soundBackmusic.play().catch(() => {});
         audioStarted = true;
       }
