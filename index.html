@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Death Row Game</title>
+  
+<style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(to bottom, #050505 0%, #0a0a0a 50%, #000000 100%);
+      color: white;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #game {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background:
+        radial-gradient(ellipse at center, rgba(20,20,20,0.5) 0%, transparent 70%),
+        repeating-linear-gradient(90deg, rgba(40,40,40,0.05) 0px, rgba(40,40,40,0.05) 2px, transparent 2px, transparent 8px),
+        linear-gradient(to bottom, rgba(15,15,15,0.8) 0%, rgba(0,0,0,1) 100%);
+      background-blend-mode: overlay;
+    }
+    #door {
+      position: absolute;
+      top: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 315px;
+      background-image: url('door1.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+.door-glow {
+  animation: glowdoor 4s infinite ease-in-out;
+  filter: brightness(1.15) drop-shadow(0 0 6px rgba(255, 200, 100, 0.25)) drop-shadow(0 0 12px rgba(255, 180, 80, 0.2));
+}
+    #prisoner {
+      position: absolute;
+      bottom: 2%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      height: 340px;
+      background-image: url('image.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    #guard-box {
+      position: absolute;
+      top: 20%;
+      left: calc(50% + 90px);
+      background: none;
+      color: #ddddcc;
+      padding: 12px 16px;
+      font-weight: bold;
+      font-size: 18px;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 2px #888, 0 0 4px #222;
+      display: none;
+      max-width: 180px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    #open-button {
+  position: absolute;
+  bottom: 10%;
+  left: 60%;
+  padding: 10px 20px;
+  background: linear-gradient(to bottom, #6b1f1f, #3c1212); /* 톤 다운된 붉은색 */
+  color: #f0e7d5;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  cursor: pointer;
+  display: none;
+  box-shadow: 2px 2px 0 #000;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+#open-button:hover {
+  background: linear-gradient(to bottom, #7f2525, #481616); /* 더 어두운 크림슨 계열 */
+  box-shadow: 0 0 8px rgba(180, 60, 60, 0.5), 0 0 12px rgba(160, 40, 40, 0.4);
+  transform: translateY(2px);
+}
+    #exclamation {
+      position: absolute;
+      top: 19%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      font-size: 50px;
+      color: rgb(205, 0, 0);
+      text-shadow: 0 0 6px red;
+      display: none;
+    }
+    #timer {
+  position: absolute;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  top: 20px;
+  right: 20px;
+  font-size: 18px;
+  color: white;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+  animation: flicker 1.5s infinite;
+}
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        text-shadow: 0 0 4px #ffebb3, 0 0 8px #ffd580, 0 0 12px #ffcc66;
+        opacity: 1;
+      }
+      20%, 24%, 55% {
+        text-shadow: none;
+        opacity: 0.5;
+      }
+    }
+      #title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 30px;
+  color: #ff4c4c;
+  text-shadow: 0 0 6px #ff1a1a, 0 0 10px #ff6666;
+  animation: titleFlicker 1.8s infinite;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+    @keyframes titleFlicker {
+      0%, 19%, 21%, 63%, 65%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 6px #ff1a1a, 0 0 10px #ff6666;
+      }
+      20%, 64% {
+        opacity: 0.4;
+        text-shadow: none;
+      }
+    }
+    @keyframes glowdoor {
+  0% {
+    filter: brightness(1.05) drop-shadow(0 0 6px rgba(255, 60, 60, 0.15)) drop-shadow(0 0 10px rgba(180, 40, 40, 0.1));
+  }
+  10% {
+    filter: brightness(1.08) drop-shadow(0 0 8px rgba(255, 70, 70, 0.18)) drop-shadow(0 0 14px rgba(200, 50, 50, 0.12));
+  }
+  25% {
+    filter: brightness(1.1) drop-shadow(0 0 10px rgba(255, 80, 80, 0.22)) drop-shadow(0 0 16px rgba(180, 40, 40, 0.15));
+  }
+  40% {
+    filter: brightness(1.08) drop-shadow(0 0 8px rgba(255, 70, 70, 0.18)) drop-shadow(0 0 14px rgba(200, 50, 50, 0.12));
+  }
+  50% {
+    filter: brightness(1.12) drop-shadow(0 0 12px rgba(255, 90, 90, 0.25)) drop-shadow(0 0 18px rgba(180, 40, 40, 0.18));
+  }
+  70% {
+    filter: brightness(1.1) drop-shadow(0 0 10px rgba(255, 75, 75, 0.22)) drop-shadow(0 0 16px rgba(200, 50, 50, 0.15));
+  }
+  75% {
+    filter: brightness(1.08) drop-shadow(0 0 8px rgba(255, 70, 70, 0.18)) drop-shadow(0 0 14px rgba(180, 40, 40, 0.12));
+  }
+  100% {
+    filter: brightness(1.05) drop-shadow(0 0 6px rgba(255, 60, 60, 0.15)) drop-shadow(0 0 10px rgba(160, 30, 30, 0.1));
+  }
+}
+
+#perspective-container {
+  position: absolute;
+  top: calc(100% - 220px); /* 기존 위치 유지 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 300px;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  z-index: 1; /* 낮은 값으로 설정하여 뒤로 보냄 */
+  pointer-events: none;
+}
+
+#prisoner {
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 340px;
+  background-image: url('image.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2; /* 높은 값으로 설정하여 앞에 표시 */
+}
+
+#perspective-plane {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(255, 76, 76, 0.2), rgba(0, 0, 0, 0));
+  clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+  transform: rotateX(75deg);
+  opacity: 0;
+  animation: fadeInPlane 1s ease-out forwards;
+}
+
+@keyframes fadeInPlane {
+  from {
+    opacity: 0;
+    transform: rotateX(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(75deg);
+  }
+}
+
+
+
+@keyframes idleBreathe {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  50% { transform: translateX(-50%) scaleY(1.02); }
+}
+#prisoner {
+  animation: idleBreathe 3s infinite;
+}
+
+
+
+</style>
+</head>
+<body>
+
+
+  <div id="game">
+    <div id="noise-overlay"></div>
+    <!-- 기존 요소들 여기에 그대로 추가 -->
+    <div id="title">Hour Unknown</div>
+    <div id="timer">Day 0</div>
+    <div id="door" class="door-glow"></div>
+    <div id="prisoner"></div>
+    <div id="guard-box"></div>
+    <div id="open-button">Open Door</div>
+    <div id="exclamation">!</div>
+    <div id="perspective-container">
+      <div id="perspective-plane"></div>
+    </div>
+  
+
+
+    <!-- Background looped sounds -->
+    <audio id="sound-knock" src="doorknock.wav"></audio>
+    <audio id="sound-open" src="dooropen.wav"></audio>
+    <audio id="sound-close" src="doorclose.wav"></audio>
+    <audio id="sound-backmusic" src="backmusic.wav" loop></audio>
+    <audio id="sound-flicker" src="flicker.wav" loop autoplay></audio>
+    <audio id="sound-neon" src="neon.wav" loop autoplay></audio>
+
+  </div>
+
+</style>
+</head>
+<body>
+
+
+  <div id="game">
+    <div id="noise-overlay"></div>
+    <!-- 기존 요소들 여기에 그대로 추가 -->
+    <div id="title">Hour Unknown</div>
+    <div id="timer">Day 0</div>
+    <div id="door" class="door-glow"></div>
+    <div id="prisoner"></div>
+    <div id="guard-box"></div>
+    <div id="open-button">Open Door</div>
+    <div id="exclamation">!</div>
+    <div id="perspective-container">
+      <div id="perspective-plane"></div>
+    </div>
+   
+
+
+    <!-- Background looped sounds -->
+    <audio id="sound-knock" src="doorknock.wav"></audio>
+    <audio id="sound-open" src="dooropen.wav"></audio>
+    <audio id="sound-close" src="doorclose.wav"></audio>
+    <audio id="sound-backmusic" src="backmusic.wav" loop></audio>
+    <audio id="sound-flicker" src="flicker.wav" loop autoplay></audio>
+    <audio id="sound-neon" src="neon.wav" loop autoplay></audio>
+
+
+
+  </div>
+<script>
+const guardBox = document.getElementById("guard-box");
+    const openButton = document.getElementById("open-button");
+    const exclamation = document.getElementById("exclamation");
+    const timer = document.getElementById("timer");
+    const door = document.getElementById("door");
+    const soundKnock = document.getElementById("sound-knock");
+    const soundOpen = document.getElementById("sound-open");
+    const soundClose = document.getElementById("sound-close");
+    const soundBackmusic = document.getElementById("sound-backmusic");
+    const soundFlicker = document.getElementById("sound-flicker");
+    const soundNeon = document.getElementById("sound-neon");
+
+    let secondsPassed = 0;
+    let meals = ["Breakfast", "Lunch", "Dinner"];
+    let mealIndex = 0;
+    let running = true;
+
+    function updateTimer() {
+      let totalMinutes = Math.floor(secondsPassed / 30);
+      let years = Math.floor(totalMinutes / 365);
+      let days = totalMinutes % 365;
+      let minutes = secondsPassed % 60;
+      let hours = Math.floor((secondsPassed % 3600) / 60);
+
+      timer.innerText = `Year ${years}, Day ${days} - ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+    function openDoor(text) {
+  const isExecution = text === "Execution Time";
+  door.style.backgroundImage = "url('doorguard.png')";
+  door.classList.remove("door-glow");
+door.style.width = "168px";
+door.style.height = "294px";
+
+  guardBox.style.display = "block";
+  guardBox.innerText = "";
+  guardBox.style.fontSize = isExecution ? "28px" : "18px";
+  guardBox.style.color = isExecution ? "#ff2222" : "#ddddcc";
+  guardBox.style.textShadow = isExecution
+    ? "0 0 10px #ff0000, 0 0 20px #aa0000"
+    : "0 0 2px #888, 0 0 4px #222";
+
+  let index = 0;
+  const typeInterval = setInterval(() => {
+      if (secondsPassed === 30) {
+        soundBackmusic.volume = 0.2;
+        soundBackmusic.play();
+      }
+    guardBox.innerText += text.charAt(index);
+    index++;
+    if (index >= text.length) {
+      clearInterval(typeInterval);
+      setTimeout(() => {
+        guardBox.style.display = "none";
+        door.style.backgroundImage = "url('door1.png')";
+        door.classList.add("door-glow");
+        soundClose.play();
+      }, 1500);
+    }
+  }, 50);
+}
+
+    function showEvent(callback) {
+      exclamation.style.display = "block";
+      soundKnock.play();
+      openButton.style.display = "block";
+      openButton.onclick = () => {
+        soundOpen.play();
+        exclamation.style.display = "none";
+        openButton.style.display = "none";
+        callback();
+      }
+    }
+
+    function randomEvent() {
+      const events = ["Lawyer Visit", "Family Visit", "Walk in the Yard"];
+      const choice = events[Math.floor(Math.random() * events.length)];
+      showEvent(() => openDoor(choice));
+    }
+
+    function mealEvent() {
+      let meal = meals[mealIndex % 3];
+      mealIndex++;
+      showEvent(() => openDoor(`${meal} Time`));
+    }
+
+    function maybeExecute() {
+      if (secondsPassed > 3600 && Math.random() < 1 / 1000) {
+        openDoor("Execution Time");
+        running = false;
+        setTimeout(() => location.reload(), 4000);
+      }
+    }
+
+    setInterval(() => {
+      if (!running) return;
+      secondsPassed++;
+      updateTimer();
+      if (secondsPassed % 10 === 0) mealEvent();
+      if (Math.random() < 2 / 60) randomEvent();
+      maybeExecute();
+    }, 1000);
+    let audioStarted = false;
+    window.addEventListener("click", () => {
+      if (!audioStarted) {
+        soundFlicker.volume = 0.2;
+        soundNeon.volume = 0.2;
+        soundFlicker.play().catch(() => {});
+        soundNeon.play().catch(() => {});
+        soundBackmusic.volume = 0.15;
+        soundBackmusic.play().catch(() => {});
+        audioStarted = true;
+      }
+    });
+</script>
+
+</body>
+</html>

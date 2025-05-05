@@ -1,0 +1,8 @@
+#prisoner {
+    ...
+    background-image: url('image.png');
+  }
+
+  #door {
+    background-image: url('door.gif');
+  }
